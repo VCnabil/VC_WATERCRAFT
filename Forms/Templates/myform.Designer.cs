@@ -1,6 +1,6 @@
-﻿namespace VC_WATERCRAFT
+﻿namespace VC_WATERCRAFT.Forms.Templates
 {
-    partial class Form1
+    partial class myform
     {
         /// <summary>
         /// Required designer variable.
@@ -30,15 +30,13 @@
         {
             this.SuspendLayout();
             // 
-            // Form1
+            // myform
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(955, 586);
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.ClientSize = new System.Drawing.Size(1375, 981);
+            this.Name = "myform";
+            this.Text = "myform";
             this.ResumeLayout(false);
 
         }
@@ -46,4 +44,3 @@
         #endregion
     }
 }
-

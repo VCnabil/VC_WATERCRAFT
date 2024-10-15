@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using VC_WATERCRAFT._GLobalz;
 
 namespace VC_WATERCRAFT.nabzuc
 {
@@ -169,15 +170,24 @@ namespace VC_WATERCRAFT.nabzuc
         {
             InitializeComponent();
             _numberOfBytes = 1;
-            this.Priority = 0x18;
+            this.Priority = 3;
             InitializeControl();
             SetDefaults();
-            _isInitialized = true; // Mark initialization as complete
+            _isInitialized = true;  
 
-            // UpdateInfoLabel();  // Update info label based on SPN
+          
         }
 
-        // Optionally override to provide custom SPN initialization
+        protected override void InitializeSPN()
+        {
+            if (string.IsNullOrEmpty(SpnName))
+            {
+                SpnName = "DefaultSPNName";  // Ensure a valid name is set before using it
+            }
+
+            _spnLite = new spnLite(SpnName, 0, _numberOfBytes, _firstByteIndex, _isLowByteFirst);
+            _spnLite.SetPGNComponents(this.Priority, 0xFF69, 0x01);
+        }
 
         private void InitializeControl()
         {
@@ -221,12 +231,11 @@ namespace VC_WATERCRAFT.nabzuc
             int xPosition = BorderThickness;
             int yPosition = BorderThickness;
 
-            //_titleLabel.Location = new Point(xPosition, yPosition);
-            _valueLabel.Location = new Point(xPosition, yPosition + 10);
+            _valueLabel.Location = new Point(xPosition, yPosition + 19);
             _valueLabel.Width = this.Width - 2 * BorderThickness;
             SizeF titlePreferredSize = _valueLabel.GetPreferredSize(new Size(_valueLabel.Width, 0));
             _valueLabel.Height = (int)Math.Ceiling(titlePreferredSize.Height);
-            yPosition += _valueLabel.Height + 20;
+            yPosition += _valueLabel.Height + 39;
 
             for (int i = 0; i < 8; i++)
             {
@@ -237,7 +246,7 @@ namespace VC_WATERCRAFT.nabzuc
 
                 if (i == 4)
                 {
-                    xPosition += _bitCheckBoxes[i - 4].Width + 20;
+                    xPosition += _bitCheckBoxes[i - 4].Width + 30;
                     yPosition = _valueLabel.Height + 20;
                 }
 
@@ -321,5 +330,7 @@ namespace VC_WATERCRAFT.nabzuc
             }
             ArrangeControlsColumn();
         }
+
+
     }
 }

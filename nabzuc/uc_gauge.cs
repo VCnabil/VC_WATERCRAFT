@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using VC_WATERCRAFT._GLobalz;
 
 namespace VC_WATERCRAFT.nabzuc
 {
@@ -101,19 +102,28 @@ namespace VC_WATERCRAFT.nabzuc
         public uc_gauge()
         {
             InitializeComponent();
-            _numberOfBytes = 2;
             this.DoubleBuffered = true;
             this.ResizeRedraw = true;
 
-            // Set the desired priority before calling SetDefaults or InitializeSPN
-            this.Priority = 0x18;  // Set to a valid priority value (0-7)
+            // Do not set NumberOfBytes here; let the designer or calling code set it
 
-            SetDefaults();
-            InitializeSPN();  // SPN will be initialized with the updated priority
+            // SetDefaults(); // Ensure defaults are set without overwriting MaxValue
+           // UpdateValue(currentValue);
+            InitializeSPN(); // SPN will be initialized with the updated priority
             this.Load += Uc_gauge_Load;
 
         }
 
+        protected override void InitializeSPN()
+        {
+            if (string.IsNullOrEmpty(SpnName))
+            {
+                SpnName = "DefaultSPNName";  // Ensure a valid name is set before using it
+            }
+
+            _spnLite = new spnLite(SpnName, 0, _numberOfBytes, _firstByteIndex, _isLowByteFirst);
+            _spnLite.SetPGNComponents(this.Priority, 0xFF69, 0x01);
+        }
 
         protected override void UpdateValue(int value)
         {
@@ -132,19 +142,13 @@ namespace VC_WATERCRAFT.nabzuc
                 _isUpdating = false;
             }
         }
-
-        public new int MaxValue
+        protected override void OnMaxValueChanged()
         {
-            get => base.MaxValue;
-            set
-            {
-                if (base.MaxValue != value)
-                {
-                    base.MaxValue = value;
-                    Invalidate();  // Redraw the gauge with the updated MaxValue
-                }
-            }
+            base.OnMaxValueChanged();
+            Invalidate(); // Redraw control when MaxValue changes
+
         }
+  
 
         public void SetValue(int value)
         {
@@ -178,7 +182,6 @@ namespace VC_WATERCRAFT.nabzuc
             }
         }
 
-
         private void UpdateValueFromMouse(Point mouseLocation)
         {
             Point center = new Point(Width / 2, Height / 2);
@@ -189,15 +192,28 @@ namespace VC_WATERCRAFT.nabzuc
             if (angle < 0) angle += 360;
             angle = (angle + _g_OFFSET_ROT_ANG) % 360;
 
-            double normalizedAngle = (_g_endAngle > _g_startAngle) ?
-                Math.Min(Math.Max(angle, _g_startAngle), _g_endAngle) :
-                Math.Max(Math.Min(angle, _g_startAngle), _g_endAngle);
+            double angleRange = _g_endAngle - _g_startAngle;
+            double normalizedAngle = angle;
 
-            // Adjust value based on custom MaxValue from base class
-            int value = _g_minValue + (int)((normalizedAngle - _g_startAngle) / (_g_endAngle - _g_startAngle) * (MaxValue - _g_minValue));
+            if (_g_endAngle > _g_startAngle)
+            {
+                if (angle < _g_startAngle)
+                    normalizedAngle = _g_startAngle;
+                else if (angle > _g_endAngle)
+                    normalizedAngle = _g_endAngle;
+            }
+            else
+            {
+                if (angle > _g_startAngle)
+                    normalizedAngle = _g_startAngle;
+                else if (angle < _g_endAngle)
+                    normalizedAngle = _g_endAngle;
+            }
+
+            int valueRange = MaxValue - _g_minValue;
+            int value = _g_minValue + (int)((normalizedAngle - _g_startAngle) / angleRange * valueRange);
             SetValue(value);
 
-            // Update SPN value to reflect the current value
             if (_spnLite != null)
             {
                 _spnLite.Value = currentValue;

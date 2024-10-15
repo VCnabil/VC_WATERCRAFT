@@ -49,7 +49,25 @@ namespace VC_WATERCRAFT
         public uc_GPSMAP()
         {
             CreateAndPlaceComponents();
-            InitializeEvents();
+
+            // Only run this code at runtime
+            if (!DesignMode)
+            {
+                InitializeEvents();
+                UpdateMaxRange();
+            }
+        }
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (!DesignMode)
+            {
+                // Move your runtime initialization logic here
+                _xietaComparator = new XIETAcomparator(); // Delayed initialization
+                UpdateDisplacements();
+                UpdateArbitraryPoint();
+            }
         }
 
         private double GetEarthRadius()

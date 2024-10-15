@@ -88,6 +88,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Templates\myform.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Templates\myform.Designer.cs">
+      <DependentUpon>myform.cs</DependentUpon>
+    </Compile>
     <Compile Include="nabzuc\uc_8bits.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -132,6 +138,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="spnuc\magicUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="spnuc\magicUC.Designer.cs">
+      <DependentUpon>magicUC.cs</DependentUpon>
+    </Compile>
     <Compile Include="_GLobalz\ColorHelpers.cs" />
     <Compile Include="_GLobalz\DoubleBufferedPanel.cs">
       <SubType>Component</SubType>
@@ -142,6 +154,9 @@
     <Compile Include="_GLobalz\XIETAcomparator.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Templates\myform.resx">
+      <DependentUpon>myform.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="nabzuc\uc_8bits.resx">
       <DependentUpon>uc_8bits.cs</DependentUpon>
@@ -173,6 +188,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include=".editorconfig" />
     <None Include="app.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
