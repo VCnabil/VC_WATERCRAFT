@@ -88,11 +88,11 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Templates\myform.cs">
+    <Compile Include="Forms\Templates\formtest.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\Templates\myform.Designer.cs">
-      <DependentUpon>myform.cs</DependentUpon>
+    <Compile Include="Forms\Templates\formtest.Designer.cs">
+      <DependentUpon>formtest.cs</DependentUpon>
     </Compile>
     <Compile Include="nabzuc\uc_8bits.cs">
       <SubType>UserControl</SubType>
@@ -155,8 +155,8 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Templates\myform.resx">
-      <DependentUpon>myform.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\Templates\formtest.resx">
+      <DependentUpon>formtest.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="nabzuc\uc_8bits.resx">
       <DependentUpon>uc_8bits.cs</DependentUpon>

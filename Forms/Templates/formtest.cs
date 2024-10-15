@@ -10,11 +10,14 @@ using System.Windows.Forms;
 
 namespace VC_WATERCRAFT.Forms.Templates
 {
-    public partial class myform : Form
+    public partial class formtest : Form
     {
-        public myform()
+        public formtest()
         {
-            InitializeComponent();
+           InitializeComponent();
+           magicUC1.SetValue(74);
         }
+
+       
     }
 }

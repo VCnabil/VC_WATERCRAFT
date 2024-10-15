@@ -14,27 +14,26 @@ namespace VC_WATERCRAFT.spnuc
     public partial class magicUC : UserControl
     {
         // Exposed properties
-        private int _m_minval = 0;
-        private int _m_maxval = 100;
-        private int _m_curval = 50;
+        private int _m_minval=0 ;
+        private int _m_maxval =65535;
+        private int _m_curval =0;
         private int _m_ticks = 10;
         private Color _sliderColor = Color.Red;
         private Color _startColor = Color.LightBlue;
         private Color _endColor = Color.LightGray;
-
-
         private int _g_OFFSET_ROT_ANG = 270;
         private int _g_startAngle = 48;
         private int _g_endAngle = 315;
-       
-      
         private bool _isUpdating = false;
+        private TextBox _valueTextBox = new TextBox();
 
         // Enum for selecting the control mode
         public enum ControlModes
         {
             Trackbar,
-            Gauge
+            Gauge,
+            EightBitsMode,
+            tbBode
         }
 
         private ControlModes _controlMode = ControlModes.Trackbar;
@@ -44,34 +43,64 @@ namespace VC_WATERCRAFT.spnuc
         public ControlModes ControlMode
         {
             get { return _controlMode; }
-            set { _controlMode = value; Invalidate(); }
+            set { 
+                _controlMode = value;
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                { 
+                    Invalidate();
+                }
+            }
         }
 
-
-        [Category("MagicUC Properties"), Description("Minimum value "), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
+        [Category("MagicUC Properties"), Description("Minimum value"), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public int m_minval
         {
             get { return _m_minval; }
-            set { _m_minval = value; Invalidate(); }
+            set
+            {
+                _m_minval = value;
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    // Ensure current value stays within the new range during runtime
+                    m_curval = Math.Max(_m_minval, Math.Min(_m_maxval, m_curval));
+                    Invalidate();
+                }
+            }
         }
 
-
-        [Category("MagicUC Properties"), Description("Maximum value "), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
+        [Category("MagicUC Properties"), Description("Maximum value"), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public int m_maxval
         {
             get { return _m_maxval; }
-            set { _m_maxval = value; Invalidate(); }
+            set
+            {
+                _m_maxval = value;
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    // Ensure current value stays within the new range during runtime
+                    m_curval = Math.Max(_m_minval, Math.Min(_m_maxval, m_curval));
+                    Invalidate();
+                }
+            }
         }
 
-
-        [Category("MagicUC Properties"), Description("Current value "), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
+        [Category("MagicUC Properties"), Description("Current value"), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public int m_curval
         {
             get { return _m_curval; }
             set
             {
-                _m_curval = Math.Max(_m_minval, Math.Min(_m_maxval, value));
-                Invalidate(); // Redraw when the value changes
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    // At runtime, enforce the min and max constraints
+                    Invalidate();
+                    _m_curval = Math.Max(_m_minval, Math.Min(_m_maxval, value));
+                }
+                else
+                {
+                    // At design time, just set the value without constraints
+                    _m_curval = value;
+                }
             }
         }
 
@@ -80,7 +109,12 @@ namespace VC_WATERCRAFT.spnuc
         public int m_ticks
         {
             get { return _m_ticks; }
-            set { _m_ticks = value; Invalidate(); }
+            set { _m_ticks = value;
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                { 
+                    Invalidate(); 
+                }
+            }
         }
 
 
@@ -88,59 +122,161 @@ namespace VC_WATERCRAFT.spnuc
         public Color SliderColor
         {
             get { return _sliderColor; }
-            set { _sliderColor = value; Invalidate(); }
+            set { _sliderColor = value;
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    Invalidate();
+                }
+
+            }
         }
 
         [Category("MagicUC Properties"), Description("Start trackbar color"), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public Color StartColor
         {
             get { return _startColor; }
-            set { _startColor = value; Invalidate(); }
+            set { _startColor = value;
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    Invalidate();
+                }
+            }
         }
         [Category("MagicUC Properties"), Description("End trackbar color "), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public Color EndColor
         {
             get { return _endColor; }
-            set { _endColor = value; Invalidate(); }
+            set { _endColor = value;
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    Invalidate();
+                }
+            }
         }
-        [Category("MagicUC Properties"), Description("Offset angle "), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
+
+
+        [Category("MagicUC Properties"), Description("Offset angle"), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public int G_OffsetRotationAngle
         {
             get { return _g_OFFSET_ROT_ANG; }
-            set { _g_OFFSET_ROT_ANG = value; Invalidate(); }
+            set
+            {
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    // Validate or adjust the offset angle if needed at runtime
+                    _g_OFFSET_ROT_ANG = value;
+                     Invalidate();
+                }
+                else
+                {
+                    // Set directly in design-time without constraints
+                    _g_OFFSET_ROT_ANG = value;
+                }
+            }
         }
-        [Category("MagicUC Properties"), Description("Start angle "), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
+
+        [Category("MagicUC Properties"), Description("Start angle"), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public int G_StartAngle
         {
             get { return _g_startAngle; }
-            set { _g_startAngle = value; Invalidate(); }
+            set
+            {
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    // Validate or adjust the start angle if needed at runtime
+                    _g_startAngle = value;
+                       Invalidate();
+                }
+                else
+                {
+                    // Set directly in design-time without constraints
+                    _g_startAngle = value;
+                }
+            }
         }
-        [Category("MagicUC Properties"), Description("End angle "), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
+
+        [Category("MagicUC Properties"), Description("End angle"), DesignerSerializationVisibility(DesignerSerializationVisibility.Visible), Browsable(true)]
         public int G_EndAngle
         {
             get { return _g_endAngle; }
-            set { _g_endAngle = value; Invalidate(); }
+            set
+            {
+                if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+                {
+                    // Validate or adjust the end angle if needed at runtime
+                    _g_endAngle = value;
+                    Invalidate();   
+                }
+                else
+                {
+                    // Set directly in design-time without constraints
+                    _g_endAngle = value;
+                }
+            }
         }
-      
 
 
         public magicUC()
         {
             InitializeComponent();
             this.DoubleBuffered = true; // To reduce flicker
-            this.MouseDown += MagicUC_MouseDown;
-            this.MouseMove += MagicUC_MouseMove;
+            if (LicenseManager.UsageMode == LicenseUsageMode.Runtime)
+            {
+                this.MouseDown += MagicUC_MouseDown;
+                this.MouseMove += MagicUC_MouseMove;
+            }
+            // Setup TextBox for tbBode mode
+            _valueTextBox.Visible = false;
+            _valueTextBox.Width = 100;
+            _valueTextBox.TextChanged += ValueTextBox_TextChanged;
+            this.Controls.Add(_valueTextBox);
         }
-
+        private void ValueTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (int.TryParse(_valueTextBox.Text, out int newValue))
+            {
+                m_curval = Math.Max(m_minval, Math.Min(m_maxval, newValue));
+                Invalidate();  // Redraw to update the display
+            }
+            else
+            {
+                _valueTextBox.Text = m_curval.ToString();  // Revert to the current value if invalid input
+            }
+        }
         private void MagicUC_MouseDown(object sender, MouseEventArgs e)
         {
-            if (_controlMode == ControlModes.Trackbar)
+            if (_controlMode == ControlModes.EightBitsMode)
+            {
+                HandleBitToggle(e.Location);
+            }
+            else if (_controlMode == ControlModes.Trackbar)
             {
                 UpdateSliderPosition(e.X);
             }
             else if (_controlMode == ControlModes.Gauge)
             {
                 UpdateValueFromMouse(e.Location);
+            }
+        }
+
+        private void HandleBitToggle(Point mouseLocation)
+        {
+            int bitWidth = 25;
+            int spacing = 10;
+            int startX = 10;
+            int startY = Height / 2 - bitWidth / 2;
+
+            // Check which bit was clicked based on the mouse X position
+            for (int i = 0; i < 8; i++)
+            {
+                Rectangle bitRect = new Rectangle(startX + i * (bitWidth + spacing), startY, bitWidth, bitWidth);
+                if (bitRect.Contains(mouseLocation))
+                {
+                    // Toggle the bit in _m_curval
+                    _m_curval ^= (1 << i); // XOR operation to toggle the bit
+                    Invalidate(); // Redraw the control to reflect the updated bit state
+                    break;
+                }
             }
         }
 
@@ -162,7 +298,19 @@ namespace VC_WATERCRAFT.spnuc
         // Programmatically set the value and update the UI
         public void SetValue(int value)
         {
-            m_curval = value; // This automatically triggers Invalidate() in the setter
+
+            if (LicenseManager.UsageMode != LicenseUsageMode.Runtime)
+            {
+                // Design-time mode - avoid setting values or attaching events
+                return;
+            }
+
+            m_curval = value;
+            if (_controlMode == ControlModes.tbBode)
+            {
+                _valueTextBox.Text = m_curval.ToString();
+            }
+            Invalidate(); // Redraw the control
         }
 
         private void UpdateSliderPosition(int mouseX)
@@ -211,23 +359,26 @@ namespace VC_WATERCRAFT.spnuc
             if (_controlMode == ControlModes.Trackbar)
             {
                 DrawTrackbar(e);
+                _valueTextBox.Visible = false;  // Hide TextBox
             }
             else if (_controlMode == ControlModes.Gauge)
             {
-                try
-                {
-                    if (Width < 10 || Height < 10)
-                    {
-                        return;
-                    }
-                    DrawGauge(e);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error drawing gauge: " + ex.Message);
-                }
+                DrawGauge(e);
+                _valueTextBox.Visible = false;  // Hide TextBox
+            }
+            else if (_controlMode == ControlModes.EightBitsMode)
+            {
+                DrawEightBitsMode(e);
+                _valueTextBox.Visible = false;  // Hide TextBox
+            }
+            else if (_controlMode == ControlModes.tbBode)
+            {
+                _valueTextBox.Visible = true;   // Show TextBox in tbBode mode
+                _valueTextBox.Text = m_curval.ToString();
+                _valueTextBox.Location = new Point(Width / 2 - _valueTextBox.Width / 2, Height / 2 - _valueTextBox.Height / 2);
             }
         }
+
 
         private void DrawTrackbar(PaintEventArgs e)
         {
@@ -340,5 +491,45 @@ namespace VC_WATERCRAFT.spnuc
 
             e.Graphics.DrawString(valueText, this.Font, Brushes.Black, valueLabelPosition);
         }
+
+        private void DrawEightBitsMode(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            int bitWidth = 25;
+            int bitHeight = 25;
+            int spacing = 10;
+            int startX = 10; // Starting X position for the first bit
+            int startY = Height / 2 - bitHeight / 2; // Center vertically
+
+            // Loop through all 8 bits
+            for (int i = 0; i < 8; i++)
+            {
+                // Check if the bit is set (1) or not (0)
+                bool isBitSet = (_m_curval & (1 << i)) != 0;
+                Color bitColor = isBitSet ? Color.Green : Color.Gray;
+                Brush bitBrush = new SolidBrush(bitColor);
+
+                // Calculate the position of the current bit's rectangle
+                Rectangle bitRect = new Rectangle(startX + i * (bitWidth + spacing), startY, bitWidth, bitHeight);
+
+                // Draw the filled rectangle representing the bit
+                g.FillRectangle(bitBrush, bitRect);
+                g.DrawRectangle(Pens.Black, bitRect); // Draw the border around the bit
+
+                // Dispose of the brush
+                bitBrush.Dispose();
+            }
+
+            // Optionally, draw the decimal value at the bottom of the control
+            string valueText = $"Decimal: {_m_curval}";
+            SizeF valueLabelSize = e.Graphics.MeasureString(valueText, this.Font);
+            Point valueLabelPosition = new Point(
+                5, // X position (left-aligned)
+                this.Height - (int)valueLabelSize.Height - 5 // Y position (bottom)
+            );
+            g.DrawString(valueText, this.Font, Brushes.Black, valueLabelPosition);
+        }
+
     }
 }

@@ -17,10 +17,10 @@ namespace VC_WATERCRAFT
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-              Application.Run(new myform());
+              Application.Run(new formtest());
 
         }
-        //[System.Runtime.InteropServices.DllImport("user32.dll")]
-        //private static extern bool SetProcessDPIAware();
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetProcessDPIAware();
     }
 }
