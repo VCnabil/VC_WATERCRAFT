@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
@@ -8,7 +9,7 @@ namespace VC_WATERCRAFT
 {
     public partial class uc_GPSMAP : UserControl
     {
-        private XIETAcomparator _xietaComparator = new XIETAcomparator();
+       // private XIETAcomparator _xietaComparator = new XIETAcomparator();
         private float _transverseDisplacement = 0f;
         private float _lateralDisplacement = 0f;
         private float _shipHeading = 0f;
@@ -46,43 +47,70 @@ namespace VC_WATERCRAFT
         private CheckBox unitsCheckBox;
         private DoubleBufferedPanel mapPanel2;
 
+  
+
+
+
+        private XIETAcomparator _xietaComparator;
+        private bool _initialized = false;
+
+        
+
         public uc_GPSMAP()
         {
             CreateAndPlaceComponents();
 
-            // Only run this code at runtime
-            if (!DesignMode)
+            if (!IsInDesignMode())
             {
-                InitializeEvents();
-                UpdateMaxRange();
+                this.Load += (sender, e) => InitializeRuntimeComponents();
             }
         }
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
 
-            if (!DesignMode)
+        private void InitializeRuntimeComponents()
+        {
+            if (_initialized)
+                return;
+
+            // Initialize runtime-only components
+            _xietaComparator = new XIETAcomparator(); // Ensure this happens only at runtime
+
+            InitializeEvents();
+            UpdateMaxRange();
+            _initialized = true;
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+
+            if (!IsInDesignMode())
             {
-                // Move your runtime initialization logic here
-                _xietaComparator = new XIETAcomparator(); // Delayed initialization
+                if (_xietaComparator == null)
+                {
+                    _xietaComparator = new XIETAcomparator();
+                }
+
                 UpdateDisplacements();
                 UpdateArbitraryPoint();
             }
         }
 
-        private double GetEarthRadius()
+        private bool IsInDesignMode()
         {
-            double earthRadiusFeet = _xietaComparator.Get_radiusEarthEquatorialFt();
-            if (_unitsInMeters)
-            {
-                return earthRadiusFeet / FeetPerMeter;
-            }
-            else
-            {
-                return earthRadiusFeet;
-            }
+            return LicenseManager.UsageMode == LicenseUsageMode.Designtime ||
+                   System.Diagnostics.Process.GetCurrentProcess().ProcessName == "devenv" ||
+                   (this.Site != null && this.Site.DesignMode);
         }
 
+        private double GetEarthRadius()
+        {
+            // Avoid accessing runtime resources in design mode
+            if (_xietaComparator == null || IsInDesignMode())
+                return 100; // Return a default value for design mode
+
+            double earthRadiusFeet = _xietaComparator.Get_radiusEarthEquatorialFt();
+            return _unitsInMeters ? earthRadiusFeet / FeetPerMeter : earthRadiusFeet;
+        }
 
         //      0                          200                        300                  400
         // 0     tb_cneterLocDouble            unitsCheckBox          gridSquareSizeBox    gridSizeLabel
@@ -227,31 +255,31 @@ namespace VC_WATERCRAFT
 
         private void InitializeEvents()
         {
-            trackBarHeading.ValueChanged += TrackBarHeading_ValueChanged;
-            btnCenterGreenDot.Click += btn_centerGreendot_Click;
-            btnSetPurpleToGreen.Click += Btn_setPurpToGreen_Click;
-            unitsCheckBox.CheckedChanged += UnitsCheckBox_CheckedChanged;
-            cb_lockArbit.CheckedChanged += CbLockArbit_CheckedChanged;
-            mapPanel2.Paint += MapPanel_Paint;
-            mapPanel2.MouseDown += MapPanel_MouseDown;
-            mapPanel2.MouseMove += MapPanel_MouseMove;
-            mapPanel2.MouseUp += MapPanel_MouseUp;
-
-            tb_cneterLocDouble.TextChanged += Tb_centerLocDouble_TextChanged;
-            gridSquareSizeBox.TextChanged += (s, e) =>
+            // Attach event handlers only if we are not in design mode
+            if (!IsInDesignMode())
             {
-                UpdateArbitraryPoint();
-                mapPanel2.Invalidate();
-            };
-
-            cb_mbivXIetaCalc.CheckedChanged += (s, e) =>
-            {
-                UpdateArbitraryPoint();
-                mapPanel2.Invalidate();
-            };
-            tx_ArbitDotRealCoordinates.TextChanged += tx_ArbitDotRealCoordinatesTextChanged;
-            cb_lockArbit.CheckedChanged += Cb_lockArbit_CheckedChanged;
-            _greenDotPosition = new PointF(mapPanel2.Width / 2f, mapPanel2.Height / 2f);
+                trackBarHeading.ValueChanged += TrackBarHeading_ValueChanged;
+                btnCenterGreenDot.Click += btn_centerGreendot_Click;
+                btnSetPurpleToGreen.Click += Btn_setPurpToGreen_Click;
+                unitsCheckBox.CheckedChanged += UnitsCheckBox_CheckedChanged;
+                cb_lockArbit.CheckedChanged += CbLockArbit_CheckedChanged;
+                mapPanel2.Paint += MapPanel_Paint;
+                mapPanel2.MouseDown += MapPanel_MouseDown;
+                mapPanel2.MouseMove += MapPanel_MouseMove;
+                mapPanel2.MouseUp += MapPanel_MouseUp;
+                tb_cneterLocDouble.TextChanged += Tb_centerLocDouble_TextChanged;
+                gridSquareSizeBox.TextChanged += (s, e) =>
+                {
+                    UpdateArbitraryPoint();
+                    mapPanel2.Invalidate();
+                };
+                cb_mbivXIetaCalc.CheckedChanged += (s, e) =>
+                {
+                    UpdateArbitraryPoint();
+                    mapPanel2.Invalidate();
+                };
+                tx_ArbitDotRealCoordinates.TextChanged += tx_ArbitDotRealCoordinatesTextChanged;
+            }
         }
 
         private void TrackBarHeading_ValueChanged(object sender, EventArgs e)
@@ -737,6 +765,7 @@ namespace VC_WATERCRAFT
 
         private void UpdateArbitraryPoint()
         {
+            if (_xietaComparator == null) return;
             _xietaComparator.UpdateParameters(_shipLatitude, _shipLongitude, _arbiLatitude, _arbiLongitude, _shipHeading);
             double[] offsets;
             bool useMBIV = cb_mbivXIetaCalc.Checked;

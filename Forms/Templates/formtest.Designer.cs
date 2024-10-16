@@ -28,24 +28,26 @@
         /// </summary>
         private void InitializeComponent()
         {
-
             this.SuspendLayout();
-
             // 
             // formtest
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-
+            this.ClientSize = new System.Drawing.Size(1600, 1433);
+            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.Name = "formtest";
             this.Text = "formtest";
             this.ResumeLayout(false);
 
         }
 
+
         #endregion
-
-
     }
 }
+
+
+
+
+

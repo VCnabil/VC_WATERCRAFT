@@ -15,9 +15,9 @@ namespace VC_WATERCRAFT.Forms.Templates
         public formtest()
         {
            InitializeComponent();
-          // magicUC1.SetValue(74);
+      
         }
 
-       
+ 
     }
 }
